@@ -24,6 +24,9 @@ dubbo:
   protocol:
     name: tri
     port: -1
+    triple:
+      http3:
+        enabled: true
   registry:
     id: zk-registry
     address: zookeeper://127.0.0.1:2181

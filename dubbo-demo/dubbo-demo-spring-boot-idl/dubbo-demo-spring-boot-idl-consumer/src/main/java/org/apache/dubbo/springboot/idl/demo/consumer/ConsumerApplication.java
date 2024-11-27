@@ -32,7 +32,7 @@ import org.springframework.stereotype.Service;
 @EnableDubbo
 public class ConsumerApplication {
 
-    @DubboReference
+    @DubboReference(parameters = {"heartbeat=6000", "connect.timeout=5000"})
     private GreeterService demoService;
 
     public static void main(String[] args) {
