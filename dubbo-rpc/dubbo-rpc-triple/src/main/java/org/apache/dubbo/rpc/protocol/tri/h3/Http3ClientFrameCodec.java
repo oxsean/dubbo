@@ -63,6 +63,7 @@ public class Http3ClientFrameCodec extends ChannelDuplexHandler {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
+        LOGGER.info("read:" + msg);
         if (msg instanceof Http3HeadersFrame) {
             Http3Headers headers = ((Http3HeadersFrame) msg).headers();
             if (headers.contains(Constants.TRI_PING)) {
@@ -88,6 +89,7 @@ public class Http3ClientFrameCodec extends ChannelDuplexHandler {
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {
+        LOGGER.info("channelReadComplete");
         if (ctx instanceof QuicStreamChannel) {
             ctx.fireChannelRead(new DefaultHttp2DataFrame(Unpooled.EMPTY_BUFFER, true));
         } else {
@@ -97,6 +99,7 @@ public class Http3ClientFrameCodec extends ChannelDuplexHandler {
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+        LOGGER.info("write:" + msg);
         if (msg instanceof Http2HeadersFrame) {
             Http2HeadersFrame frame = (Http2HeadersFrame) msg;
             ctx.write(new DefaultHttp3HeadersFrame(new Http3HeadersAdapter(frame.headers())), promise);
@@ -144,6 +147,7 @@ public class Http3ClientFrameCodec extends ChannelDuplexHandler {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        LOGGER.info("exceptionCaught", cause);
         if (cause instanceof Http3Exception) {
             Http3Exception e = (Http3Exception) cause;
             Http3ErrorCode errorCode = e.errorCode();
@@ -153,5 +157,52 @@ public class Http3ClientFrameCodec extends ChannelDuplexHandler {
             }
         }
         super.exceptionCaught(ctx, cause);
+    }
+
+    @Override
+    public void disconnect(ChannelHandlerContext ctx, ChannelPromise promise) throws Exception {
+        super.disconnect(ctx, promise);
+    }
+
+    @Override
+    public void close(ChannelHandlerContext ctx, ChannelPromise promise) throws Exception {
+        LOGGER.info("close");
+        super.close(ctx, promise);
+    }
+
+    @Override
+    public void deregister(ChannelHandlerContext ctx, ChannelPromise promise) throws Exception {
+        LOGGER.info("deregister");
+        super.deregister(ctx, promise);
+    }
+
+    @Override
+    public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+        LOGGER.info("channelRegistered");
+        super.channelRegistered(ctx);
+    }
+
+    @Override
+    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+        LOGGER.info("channelUnregistered");
+        super.channelUnregistered(ctx);
+    }
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        LOGGER.info("channelActive");
+        super.channelActive(ctx);
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        LOGGER.info("channelInactive");
+        super.channelInactive(ctx);
+    }
+
+    @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        LOGGER.info("userEventTriggered");
+        super.userEventTriggered(ctx, evt);
     }
 }

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.rpc.protocol.tri.h3;
+package org.apache.dubbo.remoting.http3.netty4;
 
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -23,7 +23,7 @@ import io.netty.incubator.codec.http3.Http3GoAwayFrame;
 import io.netty.incubator.codec.quic.QuicChannel;
 import io.netty.util.ReferenceCountUtil;
 
-public class Http3TripleServerConnectionHandler extends ChannelDuplexHandler {
+public class Http3ServerConnectionHandler extends ChannelDuplexHandler {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -48,8 +48,12 @@ public class Http3TripleServerConnectionHandler extends ChannelDuplexHandler {
 
     @Override
     public void close(ChannelHandlerContext ctx, ChannelPromise promise) throws Exception {
-        new RuntimeException().printStackTrace();
-        System.out.println("Http3TripleServerConnectionHandler close");
         super.close(ctx, promise);
+/*        QuicStreamChannel streamChannel = Http3.getLocalControlStream(ctx.channel());
+        if (streamChannel == null) {
+            return;
+        }
+        streamChannel.write(new DefaultHttp3GoAwayFrame(0));
+        streamChannel.shutdownOutput();*/
     }
 }

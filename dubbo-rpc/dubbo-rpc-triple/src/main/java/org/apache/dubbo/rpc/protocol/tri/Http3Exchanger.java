@@ -34,12 +34,13 @@ import org.apache.dubbo.remoting.utils.UrlUtils;
 import org.apache.dubbo.rpc.Constants;
 import org.apache.dubbo.rpc.model.ScopeModelUtil;
 import org.apache.dubbo.rpc.protocol.tri.h3.Http3ClientFrameCodec;
-import org.apache.dubbo.rpc.protocol.tri.h3.Http3TripleServerConnectionHandler;
+import org.apache.dubbo.remoting.http3.netty4.Http3ServerConnectionHandler;
 import org.apache.dubbo.rpc.protocol.tri.h3.negotiation.Helper;
 
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -47,7 +48,6 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.flush.FlushConsolidationHandler;
 import io.netty.handler.timeout.IdleStateHandler;
-import io.netty.incubator.codec.http3.Http3ServerConnectionHandler;
 import io.netty.incubator.codec.quic.QuicStreamChannel;
 
 import static org.apache.dubbo.remoting.http3.netty4.Constants.PIPELINE_CONFIGURATOR_KEY;
@@ -79,6 +79,7 @@ public final class Http3Exchanger {
     }
 
     public static RemotingServer bind(URL url) {
+        Executors.newSingleThreadScheduledExecutor().schedule(Http3Exchanger::close, 30, TimeUnit.SECONDS);
         if (isEnabled(url)) {
             return SERVERS.computeIfAbsent(url.getAddress(), addr -> {
                 try {
@@ -89,6 +90,7 @@ public final class Http3Exchanger {
                 }
             });
         }
+
         return null;
     }
 
@@ -96,7 +98,7 @@ public final class Http3Exchanger {
         NettyHttp3ProtocolSelectorHandler selectorHandler =
                 new NettyHttp3ProtocolSelectorHandler(url, ScopeModelUtil.getFrameworkModel(url.getScopeModel()));
         return pipeline -> {
-            pipeline.addLast(new Http3ServerConnectionHandler(new ChannelInitializer<QuicStreamChannel>() {
+            pipeline.addLast(new io.netty.incubator.codec.http3.Http3ServerConnectionHandler(new ChannelInitializer<QuicStreamChannel>() {
                 @Override
                 protected void initChannel(QuicStreamChannel ch) {
                     ch.pipeline()
@@ -106,7 +108,7 @@ public final class Http3Exchanger {
                             .addLast(selectorHandler);
                 }
             }));
-            pipeline.addLast(new Http3TripleServerConnectionHandler());
+            pipeline.addLast(new Http3ServerConnectionHandler());
         };
     }
 
@@ -132,7 +134,7 @@ public final class Http3Exchanger {
         return pipeline -> {
             pipeline.addLast(Http3ClientFrameCodec.INSTANCE);
             pipeline.addLast(new IdleStateHandler(heartbeat, 0, 0, TimeUnit.MILLISECONDS));
-            pipeline.addLast(new TriplePingPongHandler(closeTimeout));
+            //pipeline.addLast(new TriplePingPongHandler(closeTimeout));
         };
     }
 
