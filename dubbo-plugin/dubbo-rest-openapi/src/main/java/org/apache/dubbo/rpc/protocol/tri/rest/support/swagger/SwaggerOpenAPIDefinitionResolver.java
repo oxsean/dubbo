@@ -43,6 +43,7 @@ import org.apache.dubbo.rpc.protocol.tri.rest.openapi.model.Tag;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
@@ -122,7 +123,7 @@ public final class SwaggerOpenAPIDefinitionResolver
     private static Map<String, String> toProperties(io.swagger.v3.oas.annotations.extensions.Extension[] extensions) {
         int len = extensions.length;
         if (len == 0) {
-            return null;
+            return new LinkedHashMap<>();
         }
         Map<String, String> properties = CollectionUtils.newLinkedHashMap(extensions.length);
         for (io.swagger.v3.oas.annotations.extensions.Extension extension : extensions) {

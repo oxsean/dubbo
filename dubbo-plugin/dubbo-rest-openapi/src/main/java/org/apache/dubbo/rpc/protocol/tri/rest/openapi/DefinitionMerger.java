@@ -48,6 +48,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -231,6 +232,11 @@ final class DefinitionMerger {
         }
 
         Info info = target.getInfo();
+        if (info == null) {
+            info = new Info();
+            target.setInfo(info);
+        }
+
         setValue(sourceInfo::getTitle, info::setTitle);
         setValue(sourceInfo::getSummary, info::setSummary);
         setValue(sourceInfo::getDescription, info::setDescription);
@@ -240,22 +246,38 @@ final class DefinitionMerger {
         Contact sourceContact = sourceInfo.getContact();
         if (sourceContact != null) {
             Contact contact = info.getContact();
+            if (contact == null) {
+                contact = new Contact();
+                info.setContact(contact);
+            }
             setValue(sourceContact::getName, contact::setName);
             setValue(sourceContact::getUrl, contact::setUrl);
             setValue(sourceContact::getEmail, contact::setEmail);
-
-            contact.addExtensions(sourceContact.getExtensions());
+            if (sourceContact.getExtensions() != null) {
+                contact.addExtensions(sourceContact.getExtensions());
+            }
         }
 
         License sourceLicense = sourceInfo.getLicense();
         if (sourceLicense != null) {
             License license = info.getLicense();
+            if (license == null) {
+                license = new License();
+                info.setLicense(license);
+            }
             setValue(sourceLicense::getName, license::setName);
             setValue(sourceLicense::getUrl, license::setUrl);
-            license.addExtensions(sourceLicense.getExtensions());
+            if (sourceLicense.getExtensions() != null) {
+                license.addExtensions(sourceLicense.getExtensions());
+            }
         }
 
-        info.addExtensions(sourceInfo.getExtensions());
+        if (sourceInfo.getExtensions() != null) {
+            if (info.getExtensions() == null) {
+                info.setExtensions(new LinkedHashMap<>());
+            }
+            info.addExtensions(sourceInfo.getExtensions());
+        }
     }
 
     private void mergePaths(OpenAPI target, OpenAPI source, String group, String version, String[] tags) {
